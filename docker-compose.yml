@@ -1,11 +1,38 @@
+version: '3.8' # Specify compose file version
+
 services:
-  app:
+  server: # Service for the backend API
     build:
-      context: .
+      context: . # Use the root context
+      dockerfile: Dockerfile # Use the root Dockerfile as base
+    working_dir: /app # Set working directory inside container
+    command: sh -c "npm install --workspace=@recipe-finder/server --include-workspace-root && npm run dev --workspace=@recipe-finder/server"
     volumes:
-      - .:/app
+      - .:/app # Map the entire project directory
+      - /app/packages/server/node_modules # Exclude node_modules from host mapping for this service
+      - /app/packages/client/node_modules # Exclude client node_modules too
+      - /app/node_modules # Exclude root node_modules
     ports:
-      - '5173:5173'
+      - "3001:3001" # Map host port 3001 to container port 3001 (from server/.env)
     environment:
-      - CHOKIDAR_USEPOLLING=true # Ensure file watching works
-    command: sh -c "npm install && npm run dev -- --host 0.0.0.0" # Install dependencies and then run the dev server
+      - CHOKIDAR_USEPOLLING=true # For hot-reloading
+      - NODE_ENV=development
+    env_file:
+      - ./packages/server/.env # Load environment variables for the server
+
+  client: # Service for the frontend React app
+    build:
+      context: . # Use the root context
+      dockerfile: Dockerfile # Use the root Dockerfile as base
+    working_dir: /app # Set working directory inside container
+    command: sh -c "npm install --workspace=@recipe-finder/client --include-workspace-root && npm run dev --workspace=@recipe-finder/client -- --host"
+    volumes:
+      - .:/app # Map the entire project directory
+      - /app/packages/client/node_modules # Exclude node_modules from host mapping for this service
+      - /app/packages/server/node_modules # Exclude server node_modules too
+      - /app/node_modules # Exclude root node_modules
+    ports:
+      - "5173:5173" # Map host port 5173 to Vite dev server port 5173
+    environment:
+      - CHOKIDAR_USEPOLLING=true # For hot-reloading
+      - NODE_ENV=development

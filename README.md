@@ -1,79 +1,124 @@
-# Technical Test for React/Node.js Developer: Practical Coding Challenge
+# Recipe Finder Application
 
-## Task: Build an Interactive Recipe Finder
+This project is an interactive Recipe Finder application built with React (using Vite and TypeScript) for the frontend and Node.js (with Express and TypeScript) for the backend API, using MongoDB as the database.
 
-### Objective
+Users can search for recipes by ingredients, view details, toggle dark/light mode, and manage their favorite recipes.
 
-Develop a Recipe Finder application using React and Node.js. Users should be able to search for recipes based on their ingredients, save their favorite recipes, and view recipe details.
+## Features
 
-### Requirements
+*   **Ingredient Search:** Find recipes containing specific ingredients (case-insensitive).
+*   **Recipe List:** Display search results with recipe names and images.
+*   **Recipe Details:** View full details (name, image, ingredients, instructions) in a modal.
+*   **Sorting:** Sort search results by Newest, Name (A-Z), or Name (Z-A).
+*   **Favorites:** Mark/unmark recipes as favorites (persisted in `localStorage`). Filter the list to show only favorites.
+*   **Dark/Light Mode:** Toggle application theme.
+*   **Responsive Design:** Adapts to different screen sizes.
 
-#### Search Recipes
+## Tech Stack
 
-- Display an input field where users can type in ingredients they have (e.g., "garlic, broccoli").
-- As users type, display a list of recipes that match the ingredients entered. For simplicity, this can be a mock data set (stored in a database) you provide in the application.
-- The results should update in real time as ingredients are added or removed.
+### Core Technologies
 
-#### Backend REST API (Node.js)
+*   **Frontend:** React 19+, Vite, TypeScript
+*   **Backend:** Node.js (LTS), Express.js, TypeScript
+*   **Database:** MongoDB (via Mongoose ODM)
+*   **Styling:** Tailwind CSS, Shadcn UI
+*   **State Management:** Zustand (theme), TanStack React Query (server state), `localStorage` (favorites)
+*   **Testing:** Jest, React Testing Library (RTL), Supertest
+*   **Icons:** `lucide-react`
+*   **Containerization:** Docker, Docker Compose
 
-- Create a Node.js REST API to serve the recipes.
-- Use Express.js to set up your server and routes.
-- Store your recipe data in a MongoDB database and serve it using the API.
-- Implement routes for fetching all recipes, fetching a single recipe by ID, and saving a favorite recipe.
+### Key Libraries & Reasoning
 
-#### Recipe Details
+*   **`Vite`:** Fast frontend build tool and development server.
+*   **`TypeScript`:** Provides static typing for improved code quality and maintainability across the stack.
+*   **`Tailwind CSS` / `Shadcn UI`:** Utility-first CSS framework and component library for rapid, consistent UI development.
+*   **`TanStack React Query`:** Efficiently manages server state, caching, and data fetching on the client.
+*   **`Zustand`:** Minimalist state management for simple global state like the theme.
+*   **`Mongoose`:** Object Data Modeling (ODM) library for MongoDB and Node.js, simplifying database interactions.
+*   **`Jest` / `RTL` / `Supertest`:** Standard testing libraries for unit, component, integration (frontend), and API testing (backend).
+*   **`mongodb-memory-server`:** Used for running isolated MongoDB instances during backend testing.
+*   **`Docker` / `Docker Compose`:** For containerizing the application and simplifying development environment setup.
 
-When a recipe is clicked from the list, display its details on a new page or modal. This should include:
+## Project Structure
 
-- Recipe name
-- Ingredients required
-- Cooking instructions
-- An image of the dish (this can be a placeholder if actual images are not available)
+The project is a monorepo managed by npm workspaces:
 
-### Bonus Requirements
+*   `packages/client/`: Contains the React frontend application.
+*   `packages/server/`: Contains the Node.js/Express backend API.
 
-The following requirements are optional and should be addressed only if time permits:
+## Setup and Installation
 
-- **Sorting:** Implement a sorting mechanism in the search results (e.g., sort by the number of ingredients or alphabetical order).
-- **Animations:** Use animations/transitions for a smoother user experience when switching between dark and light modes or displaying recipe details.
-- **Favorite Recipes:**
-    - Provide a "favorite" button (a star icon, for instance) next to each recipe in the list.
-    - The recipe should be added to a "favorites" list when clicked.
-    - Users should be able to view their list of favorite recipes from a separate page or section.
-    - Favorite recipes should persist across browser sessions. You can use `localStorage` for this.
-- **Responsive Design:**
-    - Ensure the application is mobile-responsive and provides a seamless experience across devices.
-- **Styling and Theming:**
-    - Use styled-components or a similar library to theme the application.
-    - Implement a dark and light mode toggle button. Switching between modes should change the application's theme accordingly.
+1.  **Clone the repository:**
+    ```bash
+    git clone https://github.com/diegodscamara/recipe-finder
+    cd recipe-finder
+    ```
 
-### Integration
+2.  **Install dependencies:**
+    This command will install dependencies for both the root workspace and the client/server packages.
+    ```bash
+    npm install
+    ```
 
-- Integrate the React frontend with the Node.js backend API. Make asynchronous requests to fetch and display recipes.
-- Handle potential errors gracefully, displaying appropriate error messages to the user.
+3.  **Environment Variables:**
+    *   Navigate to the server package: `cd packages/server`
+    *   Create a `.env` file by copying the example: `cp .env.example .env` (assuming you create a `.env.example`)
+    *   Edit the `.env` file and add your MongoDB connection string:
+        ```dotenv
+        DATABASE_URL=your_mongodb_connection_string
+        PORT=3001 # Optional: specify a port for the server
+        ```
+    *   *Note:* For local development without a separate MongoDB instance, you can use the connection string provided by the Docker Compose setup (see below).
 
-### Guidelines
+## Running the Application
 
-- Prioritize code quality, modularity, and readability.
-- Avoid using boilerplate code or complete solutions available online.
-- Utilize React hooks and functional components.
-- Use Node.js APIs to populate results.
+### Option 1: Using Docker Compose (Recommended for Development)
 
-#### For the Node.js API:
+This method starts the frontend, backend, and a MongoDB database instance in containers.
 
-- Use middleware where appropriate for tasks such as error handling and logging.
-- Ensure proper HTTP status codes are sent in responses.
-- Add comments to your code explaining the purpose of each route and any middleware used.
+1.  Make sure you have Docker and Docker Compose installed.
+2.  From the project root directory, run:
+    ```bash
+    docker-compose up -d --build
+    ```
+    *   `-d` runs the containers in detached mode.
+    *   `--build` rebuilds the images if necessary.
+3.  **Access:**
+    *   Frontend: `http://localhost:5173`
+    *   Backend API: `http://localhost:3001`
+    *   The server container uses the `DATABASE_URL=mongodb://mongo:27017/recipe-finder` connection string defined in `docker-compose.yml` to connect to the MongoDB container.
+4.  **Seed Database (Optional):** To populate the database with sample recipes, run the seed script *inside the running server container*:
+    ```bash
+    docker-compose exec server npm run seed
+    ```
+5.  **Stop Containers:**
+    ```bash
+    docker-compose down
+    ```
 
-### Delivery
+### Option 2: Running Services Manually
 
-The solution should be available to us via a public GitHub repository and must contain a Readme file with instructions to clone, build, run and test both projects. We also want an overview of packages and third-party libraries that might have been used, with a reasoning regarding its choice.
+1.  **Start MongoDB:** Ensure you have a local MongoDB instance running or use a cloud service like MongoDB Atlas. Make sure the `DATABASE_URL` in `packages/server/.env` points to it.
 
-### Evaluation
+2.  **Start Backend Server:**
+    *   Navigate to the server package: `cd packages/server`
+    *   Run the development server: `npm run dev`
+    *   The server will typically run on `http://localhost:3001` (or the `PORT` specified in `.env`).
 
-We will evaluate the solution based on:
+3.  **Seed Database (Optional):** If running the server manually, seed the database:
+    *   While in `packages/server`, run: `npm run seed`
 
-- Requirements being met
-- Project structure
-- Design principles being applied
-- Code standards being followed
+4.  **Start Frontend Server:**
+    *   Navigate to the client package: `cd packages/client`
+    *   Run the development server: `npm run dev`
+    *   The client will typically run on `http://localhost:5173`.
+
+## Running Tests
+
+1.  **Run Client Tests:**
+    *   Navigate to the client package: `cd packages/client`
+    *   Run: `npm run test`
+
+2.  **Run Server Tests:**
+    *   Navigate to the server package: `cd packages/server`
+    *   Run: `npm run test`
